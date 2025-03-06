@@ -23,7 +23,6 @@
     <lua_controller id="lua">
       <actuators>
         <differential_steering implementation="default" noise_level="0.0"/>
-				<leds implementation="default" medium="leds" />
       </actuators>
 
       <sensors>
