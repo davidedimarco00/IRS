@@ -18,10 +18,10 @@
   <controllers>
     <lua_controller id="lua">
       <actuators>
-        <differential_steering implementation="default" noise_level="0.05"/>
+        <differential_steering implementation="default" noise_level="0.05" show_rays="true" />
       </actuators>
       <sensors>
-        <footbot_proximity implementation="default" noise_level="0.05" />
+        <footbot_proximity implementation="default" noise_level="0.05" show_rays="true"/>
         <footbot_light implementation="rot_z_only" show_rays="true" noise_level="0.00" />
       </sensors>
       <params script="compositeBehaviour.lua" />

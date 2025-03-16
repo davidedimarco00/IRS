@@ -18,10 +18,10 @@
   <controllers>
     <lua_controller id="lua">
       <actuators>
-        <differential_steering implementation="default" noise_level="0.05"/>
+        <differential_steering implementation="default" noise_level="0.05" show_rays="true"/>
       </actuators>
       <sensors>
-        <footbot_proximity implementation="default" noise_level="0.05" />
+        <footbot_proximity implementation="default" noise_level="0.05" show_rays="true"/>
         <footbot_light implementation="rot_z_only" show_rays="true" noise_level="0.00" />
       </sensors>
       <params script="compositeBehaviour.lua" />
@@ -32,8 +32,10 @@
   <!-- * Arena configuration * -->
   <!-- *********************** -->
   <arena size="4, 4, 1" center="0,0,0.5" positional_grid_size="8,8,1">
+    
+    <!-- Muri dell'arena -->
     <box id="bn" size="0.1, 4, 0.2" movable="false">
-      <body position="1.9, 0, 0"  orientation="0,0,0" />
+      <body position="1.9, 0, 0" orientation="0,0,0" />
     </box>
     <box id="bs" size="0.1, 4, 0.2" movable="false">
       <body position="-1.9,0,0" orientation="0,0,0" />
@@ -45,8 +47,7 @@
       <body position="0,1.9,0" orientation="0,0,0" />
     </box>
 
-
-
+    <!-- Ostacoli fissi -->
     <distribute>
       <position method="uniform" min="-2,-2,0" max="2,2,0" />
       <orientation method="uniform" min="0,0,0" max="360,0,0" />
@@ -54,17 +55,20 @@
         <box id="o" size="0.2, 0.5, 0.2" movable="false" />
       </entity>
     </distribute>
+
+    <!-- Distribuzione dei Foot-Bots -->
     <distribute>
       <position method="uniform" min="-1.9,-1.9,0" max="1.9,1.9,0" />
       <orientation method="uniform" min="0,0,0" max="360,0,0" />
-      <entity quantity="1" max_trials="100">
-        <foot-bot id="fb">
+      <entity quantity="5" max_trials="100">
+        <foot-bot id="fb" >
           <controller config="lua" />
         </foot-bot>
       </entity>
     </distribute>
-    <!-- Light -->
-     <light id="light"
+
+    <!-- Sorgente luminosa -->
+    <light id="light"
            position="1,1,0.3"
            orientation="0,0,0"
            color="green"

@@ -1,9 +1,7 @@
-
 function init()
     robot.wheels.set_velocity(5, 5)
     sensor_index = 0
     last_vision = 0
-
 end
 
 function step()
@@ -14,22 +12,20 @@ function step()
     local sensor_index = 0
     local left_speed, right_speed = 5, 5
     
+    -- Rilevamento della luce
     for i = 1, #light_sensors do
         if light_sensors[i].value > max_light then
             max_light = light_sensors[i].value
             sensor_index = i
             light_detected = true
-            if max_light > 0.4 then
-                log("arrived")
-            end
         end
     end
 
     if light_detected then
-        log("Light Detected: ",light_sensors[sensor_index].value )
+        log("Light Detected: ", light_sensors[sensor_index].value)
         local angle = math.deg(light_sensors[sensor_index].angle)
-        
-        -- Smooth movement towards light
+
+        -- Se la luce è dritta davanti, acceleriamo
         if angle < -15 then
             left_speed, right_speed = 10, 5
         elseif angle > 15 then
@@ -39,35 +35,41 @@ function step()
         end
     else
         log("Light NOT Detected")
-
     end
 
-    --obstacle avoidance
+    
     local obstacle_detected = false
-    local avoidance_turn = 0
+    local left_distance = 0
+    local right_distance = 0
 
     for i = 1, #prox_sensors do
         if prox_sensors[i].value > 0.2 then  
             obstacle_detected = true
-            avoidance_turn = prox_sensors[i].angle  
-            log("Ostacolo rilevato: valore=", prox_sensors[i].value, " angolo=", avoidance_turn)
-            break
+            if prox_sensors[i].angle > 0.2 then
+                right_distance = prox_sensors[i].value
+            else
+                left_distance = prox_sensors[i].value
+            end
         end
     end
 
     if obstacle_detected then
-        if avoidance_turn > 0 then  
-            left_speed = 10
-            right_speed = -5
-        else 
-            left_speed = -5
-            right_speed = 10
+        log("Obstacle Detected! Avoiding...")
+        -- Se c'è più spazio a sinistra, segue il bordo sulla destra
+        if left_distance > right_distance then  
+            left_speed = 3
+            right_speed = 6
+        else  
+            left_speed = 6
+            right_speed = 3
         end
-    elseif not light_detected then
+    end
+
+    -- Se non ha rilevato né luce né ostacoli, si muove casualmente
+    if not light_detected and not obstacle_detected then
         left_speed = math.random(3, 7)
         right_speed = math.random(3, 7)
     end
-
 
     robot.wheels.set_velocity(left_speed, right_speed)
 end
