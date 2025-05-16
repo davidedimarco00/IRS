@@ -7,7 +7,7 @@
   <!-- ************************* -->
   <framework>
     <system threads="0" />
-    <experiment length="3000"
+    <experiment length="0"
                 ticks_per_second="10" />
     />
   </framework>
@@ -19,14 +19,14 @@
 
     <lua_controller id="lua">
       <actuators>
-        <differential_steering implementation="default" noise_level="0.01"/>
+        <differential_steering implementation="default" noise_level="0.00"/>
 				<leds implementation="default" medium="leds" />
       </actuators>
       <sensors>
-        <footbot_proximity implementation="default" show_rays="true" noise_level="0.01" />
-        <footbot_light implementation="rot_z_only" show_rays="true" noise_level="0.01" />
-        <footbot_motor_ground implementation="rot_z_only" noise_level="0.01" />
-				<positioning implementation="default" noise_level="0.1" />
+        <footbot_proximity implementation="default" show_rays="true" noise_level="0.00" />
+        <footbot_light implementation="rot_z_only" show_rays="true" noise_level="0.00" />
+        <footbot_motor_ground implementation="rot_z_only" noise_level="0.00" />
+				<positioning implementation="default" noise_level="0.00" />
       </sensors>
      <params script="controller-subsumption.lua" />
    </lua_controller>
@@ -87,7 +87,7 @@
     <distribute>
       <position method="uniform" min="-2.9,-2.9,0" max="-2,2.9,0" />
       <orientation method="uniform" min="0,0,0" max="360,0,0" />
-      <entity quantity="1" max_trials="100">
+      <entity quantity="4" max_trials="100">
         <foot-bot id="fb1">
           <controller config="lua" />
         </foot-bot>

@@ -1,126 +1,124 @@
 function init()
-    step_count=0
+    step_count = 0
 end
 
 function step()
     step_count = step_count + 1
-    prox_sensors   = robot.proximity
-    light_sensors  = robot.light
-    ground_sensors = robot.motor_ground
-    positioning_sensors = robot.positioning 
 
-    --the first thing is explore
-    left_speed, right_speed = exploreBehavior()
+    -- Lettura sensori
+    local prox_sensors   = robot.proximity
+    local light_sensors  = robot.light
+    local ground_sensors = robot.motor_ground
 
-    --obstacle avoiding
-    a_left, a_right = avoidObstacleBehavior(prox_sensors)
-    if a_left ~= nil and a_right ~= nil then
-        left_speed  = a_left
-        right_speed = a_right
+    -- Livello base: esplorazione casuale
+    local left_speed, right_speed = exploreBehavior()
+
+    -- Livello 1: evitare ostacoli
+    local active, left_new, right_new = avoidObstacleBehavior(prox_sensors)
+    if active then
+        left_speed, right_speed = left_new, right_new
     end
 
-    --find light
-    l_left, l_right = findLightBehavior(light_sensors)
-    if l_left ~= nil and l_right ~= nil then
-        left_speed  = l_left
-        right_speed = l_right
+    -- Livello 2: fototassi
+    active, left_new, right_new = findLightBehavior(light_sensors)
+    if active then
+        left_speed, right_speed = left_new, right_new
     end
 
-    --when i am in black zone
-    s_left, s_right = stopOnBlackBehavior(ground_sensors)
-    if s_left ~= nil and s_right ~= nil then
-        left_speed  = s_left
-        right_speed = s_right
+    -- Livello 3: fermarsi sulla zona nera
+    active, left_new, right_new = stopOnBlackBehavior(ground_sensors)
+    if active then
+        left_speed, right_speed = left_new, right_new
     end
+
     robot.wheels.set_velocity(left_speed, right_speed)
 end
- 
- 
- function reset()
+
+function reset()
     robot.wheels.set_velocity(0, 0)
- end
- 
- 
- function destroy()
-    
- end
- 
+end
 
- function exploreBehavior()
-    left  = math.random(3, 6)
-    right = math.random(3, 6)
+function destroy()
+end
+
+-- Livello 0: esplorazione casuale
+function exploreBehavior()
+    local left  = math.random(3, 6)
+    local right = math.random(3, 6)
     return left, right
- end
- 
+end
 
- function avoidObstacleBehavior(prox_sensors)
-    THRESHOLD = 0.2
-    obstacle_detected = false
-    left_val  = 0
-    right_val = 0
+-- Livello 1: evitare ostacoli
+function avoidObstacleBehavior(prox_sensors)
+    local THRESHOLD = 0.2
+    local left_val, right_val = 0, 0
+    local obstacle = false
+
     for i = 1, #prox_sensors do
-       ps = prox_sensors[i]
-       if ps.value > THRESHOLD then
-          obstacle_detected = true
-          angle_deg = math.deg(ps.angle)
-          if angle_deg < 0 then
-             left_val = math.max(left_val, ps.value)
-          else
-             right_val = math.max(right_val, ps.value)
-          end
-       end
+        local sensor = prox_sensors[i]
+        if sensor.value > THRESHOLD then
+            obstacle = true
+            local angle = math.deg(sensor.angle)
+            if angle < 0 then
+                left_val = math.max(left_val, sensor.value)
+            else
+                right_val = math.max(right_val, sensor.value)
+            end
+        end
     end
- 
-    if obstacle_detected then
-       if left_val > right_val then
-          return 3, 6
-       else
-          return 6, 3
-       end
+
+    if obstacle then
+        if left_val > right_val then
+            return true, 3, 6
+        else
+            return true, 6, 3
+        end
     else
-       return nil, nil
+        return false, 0, 0
     end
- end
- 
- function findLightBehavior(light_sensors)
-    max_light = 0
-    sensor_index = -1
+end
+
+-- Livello 2: seguire la luce
+function findLightBehavior(light_sensors)
+    local max_light = 0
+    local sensor_index = -1
+
     for i = 1, #light_sensors do
-       sensor = light_sensors[i]
-       if sensor.value > max_light then
-          max_light = sensor.value
-          sensor_index = i
-       end
+        if light_sensors[i].value > max_light then
+            max_light = light_sensors[i].value
+            sensor_index = i
+        end
     end
- 
+
     if sensor_index > 0 and max_light > 0.05 then
-       angle = math.deg(light_sensors[sensor_index].angle)
-       
-       if angle < -15 then
-          return 10, 5
-       elseif angle > 15 then
-          return 5, 10
-       else
-          return 10, 10
-       end
-    else
-       return nil, nil
+        local angle = math.deg(light_sensors[sensor_index].angle)
+        if angle < -15 then
+            return true, 10, 5
+        elseif angle > 15 then
+            return true, 5, 10
+        else
+            return true, 10, 10
+        end
     end
- end
- 
- function stopOnBlackBehavior(ground_sensors)
-    THRESHOLD = 0.1
-    black_count = 0
+
+    return false, 0, 0
+end
+
+-- Livello 3: fermarsi se su nero
+function stopOnBlackBehavior(ground_sensors)
+    local THRESHOLD = 0.1
+    local black_count = 0
+
     for i = 1, #ground_sensors do
-       if ground_sensors[i].value < THRESHOLD then
-          black_count = black_count + 1
-       end
+        if ground_sensors[i].value < THRESHOLD then
+            black_count = black_count + 1
+        end
     end
+
     if black_count == 4 then
-        log("Step",step_count)
-       return 0, 0
-    else
-       return nil, nil
+        log("Stop on black at step", step_count)
+        return true, 0, 0
     end
- end
- 
+
+    return false, 0, 0
+end
