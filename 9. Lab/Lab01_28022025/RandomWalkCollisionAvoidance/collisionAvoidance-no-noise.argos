@@ -18,10 +18,10 @@
   <controllers>
     <lua_controller id="lua">
       <actuators>
-        <differential_steering implementation="default" noise_level="0.05"/>
+        <differential_steering implementation="default" noise_level="0.00"/>
       </actuators>
       <sensors>
-        <footbot_proximity implementation="default" noise_level="0.05" show_rays="true" />
+        <footbot_proximity implementation="default" noise_level="0.00" show_rays="true" />
       </sensors>
       <params script="collisionAvoidance.lua" />
     </lua_controller>

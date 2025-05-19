@@ -11,7 +11,14 @@ function step()
     local ground_sensors = robot.motor_ground
 
     -- Livello base: esplorazione casuale
-    local left_speed, right_speed = exploreBehavior()
+    local left_speed, right_speed = exploreBehavior() 
+    
+    -- qui ho cambiato la priorità come indicato dal prof.                                                                            
+    -- Livello 2: fototassi
+    active, left_new, right_new = findLightBehavior(light_sensors)
+    if active then
+        left_speed, right_speed = left_new, right_new
+    end
 
     -- Livello 1: evitare ostacoli
     local active, left_new, right_new = avoidObstacleBehavior(prox_sensors)
@@ -19,11 +26,7 @@ function step()
         left_speed, right_speed = left_new, right_new
     end
 
-    -- Livello 2: fototassi
-    active, left_new, right_new = findLightBehavior(light_sensors)
-    if active then
-        left_speed, right_speed = left_new, right_new
-    end
+   
 
     -- Livello 3: fermarsi sulla zona nera
     active, left_new, right_new = stopOnBlackBehavior(ground_sensors)
