@@ -1,4 +1,3 @@
--- Random walk with collision avoidance
 function init()
     robot.wheels.set_velocity(5, 5)
 end
@@ -6,14 +5,14 @@ end
 function step()
     local prox = robot.proximity
     local left_speed, right_speed = 5, 5
-    
+    local obs_threshold = 0.4
     local obstacle_detected = false
     local avoidance_turn = 0
     for i = 1, #prox do
-        if prox[i].value > 0.4 then  
+        if prox[i].value > obs_threshold then  
             obstacle_detected = true
             avoidance_turn = prox[i].angle  
-            log("Ostacle: value=", prox[i].value, " angle", avoidance_turn)
+            log("Obstacle: value=", prox[i].value, " angle", avoidance_turn)
             break
         end
     end

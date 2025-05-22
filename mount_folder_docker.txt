@@ -1,0 +1,3 @@
+-- Run and Mount folder irs in the container under mnt/irs
+
+docker run -p 6080:80 -v /dev/shm:/dev/shm -v "C:\Users\Davide\Desktop\IRS:/mnt/irs" tjferrara/argos3:latest

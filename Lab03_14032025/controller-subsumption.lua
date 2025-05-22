@@ -4,36 +4,21 @@ end
 
 function step()
     step_count = step_count + 1
-
-    -- Lettura sensori
     local prox_sensors   = robot.proximity
     local light_sensors  = robot.light
     local ground_sensors = robot.motor_ground
-
-    -- Livello base: esplorazione casuale
-    local left_speed, right_speed = exploreBehavior() 
-    
-    -- qui ho cambiato la priorità come indicato dal prof.                                                                            
-    -- Livello 2: fototassi
-    active, left_new, right_new = findLightBehavior(light_sensors)
-    if active then
-        left_speed, right_speed = left_new, right_new
-    end
-
-    -- Livello 1: evitare ostacoli
-    local active, left_new, right_new = avoidObstacleBehavior(prox_sensors)
-    if active then
-        left_speed, right_speed = left_new, right_new
-    end
-
-   
-
-    -- Livello 3: fermarsi sulla zona nera
-    active, left_new, right_new = stopOnBlackBehavior(ground_sensors)
-    if active then
-        left_speed, right_speed = left_new, right_new
-    end
-
+    --------DOWN TO TOP OF PYRAMID
+    --Level 4: explore env (no priority)
+    local left_speed, right_speed = exploreBehavior()
+     --Level 3: phototaxis 
+    local active, l, r = findLightBehavior(light_sensors)
+    if active then left_speed, right_speed = l, r end
+    --Level 2: avoid obstacle
+    local active, l, r = avoidObstacleBehavior(prox_sensors)
+    if active then left_speed, right_speed = l, r end
+   --Level 1: stop on black (upper level)
+    local active, l, r = stopOnBlackBehavior(ground_sensors)
+    if active then left_speed, right_speed = l, r end
     robot.wheels.set_velocity(left_speed, right_speed)
 end
 
@@ -44,14 +29,12 @@ end
 function destroy()
 end
 
--- Livello 0: esplorazione casuale
 function exploreBehavior()
     local left  = math.random(3, 6)
     local right = math.random(3, 6)
     return left, right
 end
 
--- Livello 1: evitare ostacoli
 function avoidObstacleBehavior(prox_sensors)
     local THRESHOLD = 0.2
     local left_val, right_val = 0, 0
@@ -81,7 +64,6 @@ function avoidObstacleBehavior(prox_sensors)
     end
 end
 
--- Livello 2: seguire la luce
 function findLightBehavior(light_sensors)
     local max_light = 0
     local sensor_index = -1
@@ -94,10 +76,10 @@ function findLightBehavior(light_sensors)
     end
 
     if sensor_index > 0 and max_light > 0.05 then
-        local angle = math.deg(light_sensors[sensor_index].angle)
-        if angle < -15 then
+        local angle = light_sensors[sensor_index].angle
+        if angle < -0.26 then
             return true, 10, 5
-        elseif angle > 15 then
+        elseif angle > -0.26 then
             return true, 5, 10
         else
             return true, 10, 10
@@ -107,17 +89,14 @@ function findLightBehavior(light_sensors)
     return false, 0, 0
 end
 
--- Livello 3: fermarsi se su nero
 function stopOnBlackBehavior(ground_sensors)
     local THRESHOLD = 0.1
     local black_count = 0
-
     for i = 1, #ground_sensors do
         if ground_sensors[i].value < THRESHOLD then
             black_count = black_count + 1
         end
     end
-
     if black_count == 4 then
         log("Stop on black at step", step_count)
         return true, 0, 0
