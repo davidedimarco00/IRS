@@ -37,7 +37,6 @@ function reduce_speed(v)
     if abs_v <= MAX_SPEED then
         return v
     else
-        -- Riduzione tramite radice quadrata (puoi usare anche log o divisione)
         local reduced = math.sqrt(abs_v)
         return reduced * sign
     end
