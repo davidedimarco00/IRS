@@ -28,7 +28,7 @@
         <footbot_motor_ground implementation="rot_z_only" />
         <range_and_bearing implementation="medium" medium="rab" />
       </sensors>
-      <params script="aggregation.lua" />
+      <params script="aggregation-1.lua" />
     </lua_controller>
 
   </controllers>
@@ -55,7 +55,7 @@
     <distribute>
       <position method="uniform" min="-2.5,-2.5,0" max="2.5,2.5,0" />
       <orientation method="gaussian" mean="0,0,0" std_dev="360,0,0" /> 
-      <entity quantity="20" max_trials="1000"> 
+      <entity quantity="30" max_trials="1000"> 
         <foot-bot id="fb" 
                   rab_range = "1">
           <controller config="lua" />
